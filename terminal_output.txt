@@ -1,0 +1,46 @@
+PS C:\Users\dinis\OneDrive\Desktop\College\4th year\1st semester\PRI\pri2026> ./parser.py
+Step 1: Loading Metacritic dataset...
+Step 2: Loading Steam games dataset...
+Step 3: Merging basic metadata to find overlap...
+Step 4: Extracting Metacritic summaries as independent reviews...
+Step 5: Loading and filtering Steam review data...
+
+--- FILTERING SUMMARY ---
+Steam Reviews processed initially: 12526280
+Steam Reviews kept after filtering: 500105
+Metacritic Curated Reviews added: 1787
+-------------------------
+
+Step 6: Creating the lean relational review dataset...
+Exporting reviews to compressed CSV archive...
+Reviews exported successfully! (501892 rows)
+Step 7: Generating final_games_4.json...
+Metadata exported to 'final_games_4.json' for 1788 games!
+PS C:\Users\dinis\OneDrive\Desktop\College\4th year\1st semester\PRI\pri2026> ./data_statistics.py
+Loading data for analysis...
+
+=== DATASET CHARACTERIZATION ===
+Total Unique Games: 1788
+Total Review Documents: 501892
+
+Documents by Source:
+ - Steam: 500105
+ - Metacritic: 1787
+
+Term Metrics (Review Length):
+ - Average words per review: 181.9
+ - Median words per review: 114.0
+ - Max words in a single review: 2182
+
+Steam Playtime Characteristics:
+ - Average playtime at review time: 56.1 minutes
+
+Metacritic Curated Scores:
+ - Average Metascore: 73.4
+PS C:\Users\dinis\OneDrive\Ambiente de Trabalho\College\4th year\1st semester\PRI\pri2026> ./splitter.py
+Loading the massive dataset...
+Splitting into 3 parts...
+Exporting Final_Search_Corpus_part_1.csv.gz with 167298 rows...        
+Exporting Final_Search_Corpus_part_2.csv.gz with 167298 rows...        
+Exporting Final_Search_Corpus_part_3.csv.gz with 167296 rows...        
+Done! You can now commit the 3 split files.

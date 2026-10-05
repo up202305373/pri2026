@@ -1,2 +1,3 @@
-data/
-Final_Search_Corpus.csv.gz
+.venv/
+data/raw/
+data/processed/Final_Search_Corpus.csv.gz

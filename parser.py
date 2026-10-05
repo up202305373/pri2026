@@ -4,7 +4,7 @@ import glob
 import math
 
 print("Step 1: Loading Metacritic dataset...")
-df_meta = pd.read_csv('dataset_metacritic_scraper_2025-02-15.csv', low_memory=False)
+df_meta = pd.read_csv('data/raw/Metacritic/dataset_metacritic_scraper_2025-02-15.csv', low_memory=False)
 meta_cols = ['title', 'genres/0', 'metascore', 'releaseDate', 'summary', 'userscore']
 
 avail_meta_cols = [col for col in meta_cols if col in df_meta.columns]
@@ -17,7 +17,7 @@ df_meta = df_meta.rename(columns={
 })
 
 print("Step 2: Loading Steam games dataset...")
-with open('games.json', 'r', encoding='utf-8') as f:
+with open('data/raw/Steam/games.json', 'r', encoding='utf-8') as f:
     steam_data = json.load(f)
 
 steam_rows = []
@@ -73,7 +73,7 @@ def is_latin_ascii(text):
     return percentage > 85
 
 for app_id in df_game_info['App_ID']:
-    matching_files = glob.glob(f"Game Reviews/Game Reviews/{app_id}_*.csv")
+    matching_files = glob.glob(f"data/raw/Steam/Game Reviews/{app_id}_*.csv")
 
     if matching_files:
         target_file = matching_files[0]
@@ -132,7 +132,7 @@ if all_reviews or meta_reviews:
     df_combined_reviews = pd.concat([df_all_steam_reviews, df_meta_reviews], ignore_index=True)
 
     print("Exporting reviews to compressed CSV archive...")
-    df_combined_reviews.to_csv('Final_Search_Corpus_4.csv.gz', index=False, compression='gzip')
+    df_combined_reviews.to_csv('data/processed/Final_Search_Corpus_4.csv.gz', index=False, compression='gzip')
     print(f"Reviews exported successfully! ({len(df_combined_reviews)} rows)")
 else:
     print("No reviews were found or all reviews were filtered out.")
@@ -160,7 +160,7 @@ if not df_combined_reviews.empty:
             final_games_dict[app_id] = game_obj
 
     # Export to JSON
-    with open('final_games_4.json', 'w', encoding='utf-8') as f:
+    with open('data/processed/final_games_4.json', 'w', encoding='utf-8') as f:
         json.dump(final_games_dict, f, indent=4)
 
     print(f"Metadata exported to 'final_games_4.json' for {len(final_games_dict)} games!")

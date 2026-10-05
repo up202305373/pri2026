@@ -36,13 +36,18 @@ To run this pipeline, ensure your directory is structured as follows:
 ```text
 /
 ├── parser.py                                  # Main pipeline script
-├── dataset_metacritic_scraper_2025-02-15.csv  # Metacritic dataset
-├── games.json                                 # Steam metadata dataset
-└── Games Reviews/
-    └── Games Reviews/                         # Uncompressed Steam reviews folder
-        ├── 10_123.csv
-        ├── 20_456.csv
-        └── ...
+├── data/ 
+|   ├── raw/
+|   |   ├── Steam/
+|   |   |   ├── games.json                     # Steam metadata dataset
+|   |   |   └── Game Reviews/                  # Uncompressed Steam reviews
+|   |   |       ├── 8980_1910.csv
+|   |   |       ├── 12210_58809.csv
+|   |   |       └── ...
+|   |   └── Metacritic/
+|   |       └── dataset_metacritic_scraper_2025-02-15.csv
+|   └── processed/
+└── images/
 
 ```
 

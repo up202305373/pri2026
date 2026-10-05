@@ -2,9 +2,9 @@ import pandas as pd
 import json
 
 print("Loading data for analysis...")
-df_reviews = pd.read_csv('Final_Search_Corpus_4.csv.gz', compression='gzip')
+df_reviews = pd.read_csv('data/processed/Final_Search_Corpus_4.csv.gz', compression='gzip')
 
-with open('final_games_4.json', 'r', encoding='utf-8') as f:
+with open('data/processed/final_games_4.json', 'r', encoding='utf-8') as f:
     games_data = json.load(f)
 
 print("\n=== DATASET CHARACTERIZATION ===")

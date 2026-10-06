@@ -97,6 +97,7 @@ for app_id in df_game_info['App_ID']:
                 # Filters
                 df_reviews = df_reviews.drop_duplicates(subset=['review'])
                 df_reviews = df_reviews[df_reviews['review'].str.len() > 300]
+                df_reviews = df_reviews[df_reviews['review'].str.split().str.len() >= 40]
                 df_reviews = df_reviews[df_reviews['review'].apply(is_latin_ascii)]
 
             # Sample limit

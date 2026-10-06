@@ -1,5 +1,9 @@
 import pandas as pd
 import json
+import re
+
+# https://gist.github.com/sebleier/554280
+stopwords = {"above","a","after","again","against","all","am","an","and","any","are","as","at","be","because","been","about","before","being","below","between","both","but","by","can","did","do","does","doing","don","down","during","each","few","for","from","further","had","has","have","having","he","her","here","hers","herself","him","himself","his","how","i","if","in","into","is","it","its","itself","just","me","more","most","my","myself","no","nor","not","now","of","off","on","once","only","or","other","our","ours","ourselves","out","over","own","s","same","she","should","so","some","such","t","than","that","the","their","theirs","them","themselves","then","there","these","they","this","those","through","to","too","under","until","up","very","was","we","were","what","when","where","which","while","who","whom","why","will","with","you","your","yours","yourself","yourselves"}
 
 print("Loading data for analysis...")
 df_reviews = pd.read_csv('data/processed/Final_Search_Corpus_4.csv.gz', compression='gzip')
@@ -18,11 +22,22 @@ print(f" - Steam: {source_counts.get('Steam', 0)}")
 print(f" - Metacritic: {source_counts.get('Metacritic', 0)}")
 
 # Term Metrics (Word counts)
-df_reviews['word_count'] = df_reviews['review'].apply(lambda x: len(str(x).split()))
+def tokenize(text): return re.findall(r"\b[\w']+\b", str(text).lower())
+df_reviews['word_count'] = df_reviews['review'].apply(lambda x: len(tokenize(x)))
+df_reviews['stopword_count'] = df_reviews['review'].apply(lambda x: sum(word in stopwords for word in tokenize(x)))
+df_reviews['stopword_ratio'] = df_reviews['stopword_count'] / df_reviews['word_count']
+
 print(f"\nTerm Metrics (Review Length):")
+
+print(f" - Total words across all reviews: {df_reviews['word_count'].sum():.1f}")
+print(f" - Total unique words across all reviews: {len({word for review in df_reviews['review'] for word in tokenize(review)}):.1f}")
+
 print(f" - Average words per review: {df_reviews['word_count'].mean():.1f}")
 print(f" - Median words per review: {df_reviews['word_count'].median():.1f}")
 print(f" - Max words in a single review: {df_reviews['word_count'].max()}")
+
+print(f" - Total stopword proportion: {(df_reviews['stopword_count'].sum()/df_reviews['word_count'].sum()):.2%}")
+print(f" - Average stopword proportion: {(df_reviews['stopword_ratio'].mean()):.2%}")
 
 # Playtime characteristics (Steam only)
 steam_reviews = df_reviews[df_reviews['source'] == 'Steam']

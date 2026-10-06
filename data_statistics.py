@@ -1,14 +1,15 @@
 import pandas as pd
 import json
 import re
+from collections import Counter
 
 # https://gist.github.com/sebleier/554280
 stopwords = {"above","a","after","again","against","all","am","an","and","any","are","as","at","be","because","been","about","before","being","below","between","both","but","by","can","did","do","does","doing","don","down","during","each","few","for","from","further","had","has","have","having","he","her","here","hers","herself","him","himself","his","how","i","if","in","into","is","it","its","itself","just","me","more","most","my","myself","no","nor","not","now","of","off","on","once","only","or","other","our","ours","ourselves","out","over","own","s","same","she","should","so","some","such","t","than","that","the","their","theirs","them","themselves","then","there","these","they","this","those","through","to","too","under","until","up","very","was","we","were","what","when","where","which","while","who","whom","why","will","with","you","your","yours","yourself","yourselves"}
 
 print("Loading data for analysis...")
-df_reviews = pd.read_csv('data/processed/Final_Search_Corpus_4.csv.gz', compression='gzip')
+df_reviews = pd.read_csv('data/processed/Final_Search_Corpus.csv.gz', compression='gzip')
 
-with open('data/processed/final_games_4.json', 'r', encoding='utf-8') as f:
+with open('data/processed/final_games.json', 'r', encoding='utf-8') as f:
     games_data = json.load(f)
 
 print("\n=== DATASET CHARACTERIZATION ===")
@@ -29,8 +30,12 @@ df_reviews['stopword_ratio'] = df_reviews['stopword_count'] / df_reviews['word_c
 
 print(f"\nTerm Metrics (Review Length):")
 
+unique_words = [word for review in df_reviews['review'] for word in tokenize(review)]
+word_counts = Counter(unique_words)
+
 print(f" - Total words across all reviews: {df_reviews['word_count'].sum():.1f}")
 print(f" - Total unique words across all reviews: {len({word for review in df_reviews['review'] for word in tokenize(review)}):.1f}")
+print(f" - Hapax legomena: {sum(count == 1 for count in word_counts.values()):.1f}")
 
 print(f" - Average words per review: {df_reviews['word_count'].mean():.1f}")
 print(f" - Median words per review: {df_reviews['word_count'].median():.1f}")

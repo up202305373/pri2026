@@ -15,8 +15,8 @@ The data extraction and preparation process is fully automated. It normalizes ga
 To ensure the final dataset is rich in meaningful textual data and suitable for text-based ad-hoc retrieval, the following filters are applied to the raw Steam reviews:
 
 * **Deduplication:** Removes exact duplicate reviews to prevent spam and biased weightings.
-* **Length Threshold:** Drops any review with fewer than 300 characters, ensuring documents have enough semantic density for indexing.
-* **Language & Encoding Verification:** Evaluates the character composition, requiring at least 85% of the text to be standard Latin ASCII (a-z, 0-9). This effectively filters out non-English reviews (e.g., Cyrillic, Asian characters) and corrupted encodings.
+* **Length Threshold:** Drops any review with fewer than 300 characters, ensuring documents have enough semantic density for indexing. Furthermore, we require reviews to have at least 40 words, ensuring the sampled reviews are meaningful.
+* **Language & Encoding Verification:** Evaluates the character composition, requiring at least 85% of the text to be standard Latin ASCII (a-z, 0-9). To further filter out non-English reviews and corrupted encodings, we ensured the reviews had a considerable amount of english words (at least 50% should be in the Oxford 3000 Word List).
 * **Data Sampling:** Limits Steam reviews to a maximum of 500 per game to manage storage footprint and indexing time while maintaining a large, diverse dataset.
 * **Metacritic Curation:** Extracts the Metacritic summaries and injects them as distinct review documents.
 
@@ -45,10 +45,11 @@ To run this pipeline, ensure your directory is structured as follows:
 |   |   |       ├── 12210_58809.csv
 |   |   |       └── ...
 |   |   └── Metacritic/
-|   |       └── dataset_metacritic_scraper_2025-02-15.csv
-|   └── processed/
+|   |   |   └── dataset_metacritic_scraper_2025-02-15.csv
+|   |   └── Oxford/
+|   |   |   └── The_Oxford_3000.txt
+|   └── processed/                             # Processed Dataset and relevant outputed files
 └── images/
-
 ```
 
 **Requirements:**
@@ -62,7 +63,6 @@ Run the data merging script via the command line:
 
 ```bash
 python parser.py
-
 ```
 
 ## Generated Outputs
@@ -87,3 +87,8 @@ This project integrates two distinct datasets to satisfy the requirement of comb
    * **Source:** [Kaggle - Metacritic Games Scrape](https://www.kaggle.com/datasets/zaireali/metacritic-games-scrape)
    * **Description:** Contains structured critical reception data, release dates, and professional summaries for video games.
    * **Files Used:** `dataset_metacritic_scraper_2025-02-15.csv`.
+
+3. **Oxford 3000 Word List**
+   * **Source:** [The-Oxford-3000 (Github Repo)](https://github.com/sapbmw/The-Oxford-3000), based on [Oxford Learner's Dictionaries](http://www.oxfordlearnersdictionaries.com/us/wordlist/english/oxford3000/)
+   * **Description:** Provides a text file with the 3000 most important words in english separated by ```\n```
+   * Files Used: `The_Oxford_3000.txt`

@@ -2,6 +2,8 @@ import pandas as pd
 import json
 import glob
 import math
+import re
+from rich.progress import Progress
 
 print("Step 1: Loading Metacritic dataset...")
 df_meta = pd.read_csv('data/raw/Metacritic/dataset_metacritic_scraper_2025-02-15.csv', low_memory=False)
@@ -61,7 +63,26 @@ review_cols_to_keep = ['user', 'playtime', 'post_date', 'helpfulness', 'review',
 total_reviews_processed = 0
 total_reviews_kept = 0
 
-def is_latin_ascii(text):
+def clean_steam_text(text):
+    if not isinstance(text, str):
+        return ""
+    
+    # 1. Remove URLs
+    text = re.sub(r'http[s]?://\S+', '', text)
+    
+    # 2. Remove Steam emotes (e.g., :steamhappy:, :thumbsup:)
+    text = re.sub(r':[a-zA-Z0-9_]+:', ' ', text)
+    
+    # 3. Remove BBCode tags (e.g., [b], [/b], [url=link])
+    text = re.sub(r'\[/?.*?\]', ' ', text)
+    
+    # 4. Remove excessive symbols used in checklists/ascii art (optional but recommended)
+    text = re.sub(r'[■☑☐✓✔=+|]+', ' ', text)
+    
+    # Normalize whitespace
+    return ' '.join(text.split())
+
+def is_latin_ascii(text, threshold_percentage):
     if not isinstance(text, str) or len(text) == 0:
         return False
     text_no_spaces = text.replace(" ", "").replace("\n", "").replace("\r", "")
@@ -70,48 +91,78 @@ def is_latin_ascii(text):
 
     ascii_count = sum(1 for c in text_no_spaces if c.isascii() and c.isalnum())
     percentage = (ascii_count / len(text_no_spaces)) * 100
-    return percentage > 85
+    return percentage > threshold_percentage
 
-for app_id in df_game_info['App_ID']:
-    matching_files = glob.glob(f"data/raw/Steam/Game Reviews/{app_id}_*.csv")
+file_path = "./data/raw/Oxford/The_Oxford_3000.txt"
+try:
+    with open(file_path, 'r', encoding='utf-8') as oxfordFile:
+        OXFORD_VOCAB = set(line.strip().lower() for line in oxfordFile if line.strip())
+except FileNotFoundError:
+    raise FileNotFoundError(f"Could not find the file: {file_path}")
 
-    if matching_files:
-        target_file = matching_files[0]
-        try:
-            df_reviews = pd.read_csv(target_file)
+def is_english(text, threshold_percentage):
+    if not isinstance(text, str) or len(text) == 0:
+        return False
 
-            initial_count = len(df_reviews)
-            total_reviews_processed += initial_count
+    text_words = re.findall(r"\b[a-z]+(?:'[a-z]+)?\b", text.lower())
+    total_words = len(text_words)
+    
+    if total_words == 0:
+        return False
+        
+    matched_words = sum(1 for word in text_words if word in OXFORD_VOCAB)
+    actual_percentage = (matched_words / total_words) * 100
+    
+    return actual_percentage >= threshold_percentage
+with Progress() as p:
+    t = p.add_task("Processing...", total=len(df_game_info['App_ID']))
+    for app_id in df_game_info['App_ID']:
+        matching_files = glob.glob(f"data/raw/Steam/Game Reviews/{app_id}_*.csv")
 
-            avail_review_cols = [col for col in review_cols_to_keep if col in df_reviews.columns]
-            df_reviews = df_reviews[avail_review_cols]
+        if matching_files:
+            target_file = matching_files[0]
+            try:
+                df_reviews = pd.read_csv(target_file)
 
-            if 'review' in df_reviews.columns:
-                df_reviews = df_reviews.dropna(subset=['review'])
-                df_reviews['review'] = df_reviews['review'].astype(str)
+                initial_count = len(df_reviews)
+                total_reviews_processed += initial_count
 
-                # Convert Date Format
-                if 'post_date' in df_reviews.columns:
-                    df_reviews['post_date'] = pd.to_datetime(df_reviews['post_date'], errors='coerce').dt.strftime('%d/%m/%Y')
+                avail_review_cols = [col for col in review_cols_to_keep if col in df_reviews.columns]
+                df_reviews = df_reviews[avail_review_cols]
 
-                # Filters
-                df_reviews = df_reviews.drop_duplicates(subset=['review'])
-                df_reviews = df_reviews[df_reviews['review'].str.len() > 300]
-                df_reviews = df_reviews[df_reviews['review'].str.split().str.len() >= 40]
-                df_reviews = df_reviews[df_reviews['review'].apply(is_latin_ascii)]
+                if 'review' in df_reviews.columns:
+                    df_reviews = df_reviews.dropna(subset=['review'])
+                    df_reviews['review'] = df_reviews['review'].astype(str)
 
-            # Sample limit
-            if len(df_reviews) > 500:
-                df_reviews = df_reviews.sample(n=500, random_state=42)
+                    # Convert Date Format
+                    if 'post_date' in df_reviews.columns:
+                        df_reviews['post_date'] = pd.to_datetime(df_reviews['post_date'], errors='coerce').dt.strftime('%d/%m/%Y')
 
-            total_reviews_kept += len(df_reviews)
+                    # Create a temporary column for the sanitized text
+                    df_reviews['clean_review'] = df_reviews['review'].apply(clean_steam_text)
 
-            df_reviews['App_ID'] = str(app_id)
-            df_reviews['source'] = 'Steam'
-            all_reviews.append(df_reviews)
+                    # Filter by the clean text, while mainting the original review
+                    df_reviews = df_reviews[df_reviews['clean_review'].str.len() > 300]
+                    df_reviews = df_reviews[df_reviews['clean_review'].str.split().str.len() >= 40]
+                    df_reviews = df_reviews[df_reviews['clean_review'].apply(is_latin_ascii, args=(85,))]
+                    df_reviews = df_reviews[df_reviews['clean_review'].apply(is_english, args=(50,))]
 
-        except Exception as e:
-            print(f"Error reading {target_file}: {e}")
+                    # 5. Drop the temporary column to keep your dataframe lean
+                    df_reviews = df_reviews.drop(columns=['clean_review'])
+                # Sample limit
+                if len(df_reviews) > 500:
+                    df_reviews = df_reviews.sample(n=500, random_state=42)
+
+                total_reviews_kept += len(df_reviews)
+
+                df_reviews['App_ID'] = str(app_id)
+                df_reviews['source'] = 'Steam'
+                all_reviews.append(df_reviews)
+
+            except Exception as e:
+                print(f"Error reading {target_file}: {e}")
+
+        p.update(t, advance=1)
 
 print(f"\n--- FILTERING SUMMARY ---")
 print(f"Steam Reviews processed initially: {total_reviews_processed}")
@@ -133,14 +184,14 @@ if all_reviews or meta_reviews:
     df_combined_reviews = pd.concat([df_all_steam_reviews, df_meta_reviews], ignore_index=True)
 
     print("Exporting reviews to compressed CSV archive...")
-    df_combined_reviews.to_csv('data/processed/Final_Search_Corpus_4.csv.gz', index=False, compression='gzip')
+    df_combined_reviews.to_csv('data/processed/Final_Search_Corpus.csv.gz', index=False, compression='gzip')
     print(f"Reviews exported successfully! ({len(df_combined_reviews)} rows)")
 else:
     print("No reviews were found or all reviews were filtered out.")
 
 # 7. Generate final_games.json using ONLY the games that survived the pipeline
 if not df_combined_reviews.empty:
-    print("Step 7: Generating final_games_4.json...")
+    print("Step 7: Generating final_games.json...")
 
     # Get the unique App IDs that have at least one valid review in our final corpus
     valid_app_ids = set(df_combined_reviews['App_ID'].astype(str).unique())
@@ -161,7 +212,7 @@ if not df_combined_reviews.empty:
             final_games_dict[app_id] = game_obj
 
     # Export to JSON
-    with open('data/processed/final_games_4.json', 'w', encoding='utf-8') as f:
+    with open('data/processed/final_games.json', 'w', encoding='utf-8') as f:
         json.dump(final_games_dict, f, indent=4)
 
-    print(f"Metadata exported to 'final_games_4.json' for {len(final_games_dict)} games!")
+    print(f"Metadata exported to 'final_games.json' for {len(final_games_dict)} games!")

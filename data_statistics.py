@@ -53,12 +53,16 @@ print(f" - Average slur proportion: {(df_reviews['slur_ratio'].mean()):.2%}")
 
 # Playtime characteristics (Steam only)
 steam_reviews = df_reviews[df_reviews['source'] == 'Steam']
-print(f"\nSteam Playtime Characteristics:")
+print(f"\nSteam Characteristics:")
+steam_reviews = df_reviews[df_reviews['source'] == 'Steam'].copy()
+steam_reviews['recommend_binary'] = (steam_reviews['recommend'].astype(str).str.lower().map({'recommended': 1,'not recommended': 0}))
+recommendation_stats = steam_reviews.groupby('App_ID').agg(recommendation_ratio=('recommend_binary', 'mean'),)
+print(f" - Average recommendation ratio: {recommendation_stats['recommendation_ratio'].mean():.2%}")
 print(f" - Average playtime at review time: {steam_reviews['playtime'].mean():.1f} minutes")
 
 # Metascore characteristics
 meta_reviews = df_reviews[df_reviews['source'] == 'Metacritic']
-print(f"\nMetacritic Curated Scores:")
+print(f"\nMetacritic Characteristics:")
 print(f" - Average Metascore: {meta_reviews['metascore'].mean():.1f}")
 
 userscores = pd.Series(pd.to_numeric([game.get('userscore') for game in games_data.values()],errors='coerce'))

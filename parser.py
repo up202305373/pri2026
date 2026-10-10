@@ -18,6 +18,9 @@ df_meta = df_meta.rename(columns={
     'summary': 'Meta_Summary'
 })
 
+# Remove rows that have an empty summary
+df_meta = df_meta.dropna(subset=['Meta_Summary'])
+
 print("Step 2: Loading Steam games dataset...")
 with open('data/raw/Steam/games.json', 'r', encoding='utf-8') as f:
     steam_data = json.load(f)
@@ -197,7 +200,7 @@ if not df_combined_reviews.empty:
     valid_app_ids = set(df_combined_reviews['App_ID'].astype(str).unique())
 
     final_games_dict = {}
-    for app_id in valid_app_ids:
+    for app_id in sorted(valid_app_ids):
         if app_id in steam_data:
             game_obj = steam_data[app_id].copy()
 

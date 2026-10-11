@@ -59,10 +59,15 @@ To run this pipeline, ensure your directory is structured as follows:
 
 ## Usage
 
-Run the data merging script via the command line:
+Ensure the raw datasets are placed in their respective `data/raw/` directories. You can then run the entire pipeline and view the resulting dataset statistics using the included Makefile:
 
 ```bash
-python parser.py
+# Run the pipeline and generate statistics
+make all
+
+# Or run them individually:
+make process
+make stats
 ```
 
 ## Generated Outputs
@@ -71,6 +76,7 @@ Executing the script will generate two optimized deliverables for Milestone 2:
 
 1. **`Final_Search_Corpus.csv.gz`**: A GZIP-compressed CSV file containing all filtered unstructured textual reviews and their specific metrics (playtime, helpfulness, metascore, source). Compressed to adhere to storage limits while maintaining thousands of textual documents.
 2. **`final_games.json`**: A lightweight JSON file containing only the structured metadata (Title, Release Date, Genres, Userscore) for the specific games that successfully passed through the filtering pipeline.
+3. **`analysis_output_*.txt`**: A record of the statistics displayed in the user\'s terminal.
 
 The final dataset includes 500,105 steam reviews (of a total of 12,526,280 available in the original dataset) and 1,787 Metacritic reviews. Due to its sheer size, he have divided Final_Search_Corpus.csv.gz into 3 files, so as to allow their usage in the github environment.
 

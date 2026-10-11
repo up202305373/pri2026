@@ -1,0 +1,31 @@
+Loading data for analysis...
+
+=== DATASET CHARACTERIZATION ===
+Total Unique Games: 1787
+Total Review Documents: 458437
+
+Documents by Source:
+ - Steam: 456650
+ - Metacritic: 1787
+
+Term Metrics (Review Length):
+ - Total words across all reviews: 86124139.0
+ - Total unique words across all reviews: 304852.0
+ - Total words that appear exactly once (hapax legomena): 179248.0
+
+ - Average words per review: 187.9
+ - Median words per review: 119.0
+ - Max words in a single review: 2247
+
+ - Total stopword proportion: 46.96%
+ - Average stopword proportion: 46.48%
+ - Total slur proportion: 0.02%
+ - Average slur proportion: 0.02%
+
+Steam Characteristics:
+ - Average recommendation ratio: 74.48%
+ - Average playtime at review time: 59.4 minutes
+
+Metacritic Characteristics:
+ - Average Metascore: 73.4
+ - Average Userscore: 6.9

@@ -2,6 +2,30 @@ import pandas as pd
 import json
 import re
 from collections import Counter
+import sys
+from datetime import datetime
+
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+log_filename = f"data/processed/analysis_output_{timestamp}.txt"
+log_file = open(log_filename, "w", encoding="utf-8")
+
+class Tee:
+    def __init__(self, *files):
+        self.files = files
+        
+    def write(self, obj):
+        for f in self.files:
+            if not getattr(f, 'closed', False):
+                f.write(obj)
+                f.flush()
+                
+    def flush(self):
+        for f in self.files:
+            if not getattr(f, 'closed', False):
+                f.flush()
+
+# logs terminal prints into a file as well
+sys.stdout = Tee(sys.stdout, log_file)
 
 # https://gist.github.com/sebleier/554280
 stopwords = {"above","a","after","again","against","all","am","an","and","any","are","as","at","be","because","been","about","before","being","below","between","both","but","by","can","did","do","does","doing","don","down","during","each","few","for","from","further","had","has","have","having","he","her","here","hers","herself","him","himself","his","how","i","if","in","into","is","it","its","itself","just","me","more","most","my","myself","no","nor","not","now","of","off","on","once","only","or","other","our","ours","ourselves","out","over","own","s","same","she","should","so","some","such","t","than","that","the","their","theirs","them","themselves","then","there","these","they","this","those","through","to","too","under","until","up","very","was","we","were","what","when","where","which","while","who","whom","why","will","with","you","your","yours","yourself","yourselves"}
@@ -67,3 +91,5 @@ print(f" - Average Metascore: {meta_reviews['metascore'].mean():.1f}")
 
 userscores = pd.Series(pd.to_numeric([game.get('userscore') for game in games_data.values()],errors='coerce'))
 print(f" - Average Userscore: {userscores.mean():.1f}")
+
+log_file.close()

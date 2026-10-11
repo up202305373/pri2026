@@ -4,12 +4,16 @@ all: process stats
 
 process:
 	@echo "Running data processing pipeline..."
-	python parser.py
+	python3 parser.py
 
 stats:
 	@echo "Generating corpus statistics..."
-	python data_statistics.py
+	python3 data_statistics.py
 
 clean:
 	@echo "Cleaning processed data..."
-	rm -f data/processed/*.json data/processed/*.csv.gz
+	rm -f data/processed/*.json data/processed/*.csv.gz analysis_output_*.txt
+
+split:
+	@echo "Splitting dataset into 3 parts..."
+	python3 splitter.py

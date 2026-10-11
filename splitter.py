@@ -2,7 +2,7 @@ import pandas as pd
 import math
 
 print("Loading the massive dataset...")
-df = pd.read_csv('data/processed/Final_Search_Corpus_4.csv.gz', compression='gzip')
+df = pd.read_csv('data/processed/Final_Search_Corpus.csv.gz', compression='gzip')
 
 print("Splitting into 3 parts...")
 num_chunks = 3

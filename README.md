@@ -59,11 +59,15 @@ To run this pipeline, ensure your directory is structured as follows:
 
 ## Usage
 
-Run the data merging script via the command line:
+Ensure the raw datasets are placed in their respective `data/raw/` directories. You can then run the entire pipeline and view the resulting dataset statistics using the included Makefile:
 
 ```bash
-python parser.py
-```
+# Run the pipeline and generate statistics
+make all
+
+# Or run them individually:
+make process
+make stats
 
 ## Generated Outputs
 

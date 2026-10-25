@@ -98,3 +98,16 @@ This project integrates two distinct datasets to satisfy the requirement of comb
    * **Source:** [The-Oxford-3000 (Github Repo)](https://github.com/sapbmw/The-Oxford-3000), based on [Oxford Learner's Dictionaries](http://www.oxfordlearnersdictionaries.com/us/wordlist/english/oxford3000/)
    * **Description:** Provides a text file with the 3000 most important words in english separated by ```\n```
    * Files Used: `The_Oxford_3000.txt`
+
+
+
+
+
+docker run --name pri_solr -p 8983:8983 -d solr:10 solr-precreate games
+
+curl 'http://localhost:8983/solr/games/schema/fields/_nest_path_'
+
+for f in data/solr/games_batch_*.json; do
+  curl -X POST -H 'Content-Type: application/json' --data-binary @"$f" 'http://localhost:8983/solr/games/update'
+done
+curl 'http://localhost:8983/solr/games/update?commit=true'

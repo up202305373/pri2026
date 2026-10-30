@@ -101,11 +101,15 @@ This project integrates two distinct datasets to satisfy the requirement of comb
 
 ## **Milestone 2:** Indexing and Retrieval
 
-docker run --name pri_solr -p 8983:8983 -d solr:10 solr-precreate games
+The corpus is indexed in Apache Solr 10 as nested documents: each game is a parent document, and its Steam and Metacritic reviews are child documents under the `review_docs` key. A single collection holds both levels, distinguished by `doc_type`.
 
-curl 'http://localhost:8983/solr/games/schema/fields/_nest_path_'
+**Setup A** (baseline): `text_general` analysis on `review` and `name`. The schema is in `schema_fix.json`, and the field types and `indexed` flags follow the search scenarios.
 
-for f in data/solr/games_batch_*.json; do
-  curl -X POST -H 'Content-Type: application/json' --data-binary @"$f" 'http://localhost:8983/solr/games/update'
-done
-curl 'http://localhost:8983/solr/games/update?commit=true'
+### Running
+
+```bash
+make solr-start    # start the container
+make solr-index    # recreate the collection, apply the schema, post all batches
+make solr-count    # check document counts
+make solr-stop     # stop the container
+```

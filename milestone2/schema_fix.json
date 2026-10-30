@@ -1,0 +1,259 @@
+[
+  {
+    "add-field": {
+      "name": "App_ID",
+      "type": "string",
+      "stored": true,
+      "indexed": true
+    }
+  },
+  {
+    "add-field": {
+      "name": "doc_type",
+      "type": "string",
+      "stored": true,
+      "indexed": true
+    }
+  },
+  {
+    "add-field": {
+      "name": "source",
+      "type": "string",
+      "stored": true,
+      "indexed": true
+    }
+  },
+  {
+    "add-field": {
+      "name": "recommend",
+      "type": "string",
+      "stored": true,
+      "indexed": true
+    }
+  },
+  {
+    "add-field": {
+      "name": "user",
+      "type": "string",
+      "stored": true,
+      "indexed": false
+    }
+  },
+
+  {
+    "add-field": {
+      "name": "about_the_game",
+      "type": "text_general",
+      "stored": true,
+      "indexed": false
+    }
+  },
+  {
+    "add-field": {
+      "name": "detailed_description",
+      "type": "text_general",
+      "stored": true,
+      "indexed": false
+    }
+  },
+  {
+    "add-field": {
+      "name": "short_description",
+      "type": "text_general",
+      "stored": true,
+      "indexed": false
+    }
+  },
+
+  {
+    "add-field": {
+      "name": "categories",
+      "type": "string",
+      "multiValued": true,
+      "stored": true,
+      "indexed": false
+    }
+  },
+  {
+    "add-field": {
+      "name": "genres",
+      "type": "string",
+      "multiValued": true,
+      "stored": true,
+      "indexed": false
+    }
+  },
+  {
+    "add-field": {
+      "name": "tags",
+      "type": "string",
+      "multiValued": true,
+      "stored": true,
+      "indexed": false
+    }
+  },
+  {
+    "add-field": {
+      "name": "supported_languages",
+      "type": "string",
+      "multiValued": true,
+      "stored": true,
+      "indexed": false
+    }
+  },
+  {
+    "add-field": {
+      "name": "full_audio_languages",
+      "type": "string",
+      "multiValued": true,
+      "stored": true,
+      "indexed": false
+    }
+  },
+
+  {
+    "add-field": {
+      "name": "price",
+      "type": "pdouble",
+      "stored": true,
+      "indexed": false
+    }
+  },
+  {
+    "add-field": {
+      "name": "discount",
+      "type": "plong",
+      "stored": true,
+      "indexed": false
+    }
+  },
+  {
+    "add-field": {
+      "name": "userscore",
+      "type": "string",
+      "stored": true,
+      "indexed": false
+    }
+  },
+  {
+    "add-field": {
+      "name": "metascore",
+      "type": "pdouble",
+      "stored": true,
+      "indexed": true
+    }
+  },
+  {
+    "add-field": {
+      "name": "playtime",
+      "type": "pdouble",
+      "stored": true,
+      "indexed": false
+    }
+  },
+  {
+    "add-field": {
+      "name": "helpfulness",
+      "type": "pdouble",
+      "stored": true,
+      "indexed": false
+    }
+  },
+
+  {
+    "add-field": {
+      "name": "required_age",
+      "type": "plong",
+      "stored": true,
+      "indexed": false
+    }
+  },
+  {
+    "add-field": {
+      "name": "positive",
+      "type": "plong",
+      "stored": true,
+      "indexed": true
+    }
+  },
+  {
+    "add-field": {
+      "name": "negative",
+      "type": "plong",
+      "stored": true,
+      "indexed": true
+    }
+  },
+  {
+    "add-field": {
+      "name": "peak_ccu",
+      "type": "plong",
+      "stored": true,
+      "indexed": false
+    }
+  },
+  {
+    "add-field": {
+      "name": "average_playtime_forever",
+      "type": "plong",
+      "stored": true,
+      "indexed": false
+    }
+  },
+  {
+    "add-field": {
+      "name": "average_playtime_2weeks",
+      "type": "plong",
+      "stored": true,
+      "indexed": false
+    }
+  },
+  {
+    "add-field": {
+      "name": "median_playtime_forever",
+      "type": "plong",
+      "stored": true,
+      "indexed": false
+    }
+  },
+  {
+    "add-field": {
+      "name": "median_playtime_2weeks",
+      "type": "plong",
+      "stored": true,
+      "indexed": false
+    }
+  },
+  {
+    "add-field": {
+      "name": "name",
+      "type": "text_general",
+      "stored": true,
+      "indexed": true
+    }
+  },
+  {
+    "add-field": {
+      "name": "review", 
+      "type": "text_general", 
+      "stored": true, 
+      "indexed": true
+      }
+    },
+  {
+    "add-field": {
+      "name": "post_date", 
+      "type": "string", 
+      "stored": true, 
+      "indexed": false
+    }
+  },
+  {
+    "add-field": {
+      "name": "release_date", 
+      "type": "string", 
+      "stored": true, 
+      "indexed": false
+    }
+  }
+]

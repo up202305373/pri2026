@@ -20,8 +20,8 @@ To ensure the final dataset is rich in meaningful textual data and suitable for 
 * **Data Sampling:** Limits Steam reviews to a maximum of 500 per game to manage storage footprint and indexing time while maintaining a large, diverse dataset.
 * **Metacritic Curation:** Extracts the Metacritic summaries and injects them as distinct review documents.
 
-![pipeline](./images/pipelineDiagram.png)
-![class](./images/classDiagram.png)
+![pipeline](./milestone1/images/pipelineDiagram.png)
+![class](./milestone1/images/classDiagram.png)
 
 ### Conceptual Domain Model
 

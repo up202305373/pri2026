@@ -2,15 +2,15 @@
 
 **Course:** Master in Informatics Engineering and Computation (M.EIC), FEUP U.Porto
 
-**Milestone 1:** Data Preparation
+## **Milestone 1:** Data Preparation
 
 The pipeline combines structured game metadata with unstructured textual reviews from two distinct data sources: Steam and Metacritic.
 
-## Data Processing Pipeline
+### Data Processing Pipeline
 
 The data extraction and preparation process is fully automated. It normalizes game titles to find overlapping datasets, standardizes date formats, and aggressively filters raw Steam reviews to build a high-quality corpus for indexing.
 
-### Filtering & Quality Control
+#### Filtering & Quality Control
 
 To ensure the final dataset is rich in meaningful textual data and suitable for text-based ad-hoc retrieval, the following filters are applied to the raw Steam reviews:
 
@@ -20,16 +20,16 @@ To ensure the final dataset is rich in meaningful textual data and suitable for 
 * **Data Sampling:** Limits Steam reviews to a maximum of 500 per game to manage storage footprint and indexing time while maintaining a large, diverse dataset.
 * **Metacritic Curation:** Extracts the Metacritic summaries and injects them as distinct review documents.
 
-![pipeline](./images/pipelineDiagram.png)
-![class](./images/classDiagram.png)
+![pipeline](./milestone1/images/pipelineDiagram.png)
+![class](./milestone1/images/classDiagram.png)
 
-## Conceptual Domain Model
+### Conceptual Domain Model
 
 The conceptual model centers on a **One-to-Many (1-to-N)** relationship between the physical games and their associated textual reviews.
 
 Both Steam user reviews and Metacritic critical summaries share the `Review` schema. The `source` attribute tracks the origin, allowing for distinct retrieval strategies and query boosting in future milestones.
 
-## Repository Structure & Prerequisites
+### Repository Structure & Prerequisites
 
 To run this pipeline, ensure your directory is structured as follows:
 
@@ -57,7 +57,7 @@ To run this pipeline, ensure your directory is structured as follows:
 * Python 3.x
 * Pandas (`pip install pandas`)
 
-## Usage
+### Usage
 
 Ensure the raw datasets are placed in their respective `data/raw/` directories. You can then run the entire pipeline and view the resulting dataset statistics using the included Makefile:
 
@@ -70,7 +70,7 @@ make process
 make stats
 ```
 
-## Generated Outputs
+### Generated Outputs
 
 Executing the script will generate two optimized deliverables for Milestone 2:
 
@@ -80,7 +80,7 @@ Executing the script will generate two optimized deliverables for Milestone 2:
 
 The final dataset includes 500,105 steam reviews (of a total of 12,526,280 available in the original dataset) and 1,787 Metacritic reviews. Due to its sheer size, he have divided Final_Search_Corpus.csv.gz into 3 files, so as to allow their usage in the github environment.
 
-## Datasets & Provenance
+### Datasets & Provenance
 
 This project integrates two distinct datasets to satisfy the requirement of combining structured data with unstructured, rich textual fields.
 
@@ -98,3 +98,18 @@ This project integrates two distinct datasets to satisfy the requirement of comb
    * **Source:** [The-Oxford-3000 (Github Repo)](https://github.com/sapbmw/The-Oxford-3000), based on [Oxford Learner's Dictionaries](http://www.oxfordlearnersdictionaries.com/us/wordlist/english/oxford3000/)
    * **Description:** Provides a text file with the 3000 most important words in english separated by ```\n```
    * Files Used: `The_Oxford_3000.txt`
+
+## **Milestone 2:** Indexing and Retrieval
+
+The corpus is indexed in Apache Solr 10 as nested documents: each game is a parent document, and its Steam and Metacritic reviews are child documents under the `review_docs` key. A single collection holds both levels, distinguished by `doc_type`.
+
+**Setup A** (baseline): `text_general` analysis on `review` and `name`. The schema is in `schema_fix.json`, and the field types and `indexed` flags follow the search scenarios.
+
+### Running
+
+```bash
+make solr-start    # start the container
+make solr-index    # recreate the collection, apply the schema, post all batches
+make solr-count    # check document counts
+make solr-stop     # stop the container
+```

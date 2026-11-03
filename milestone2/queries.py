@@ -7,9 +7,14 @@ URL = f"http://localhost:8983/solr/games/select"
 QUERIES = [
     # ========== SEARCH SCENARIO 1 ==========
     {
-        "id": "S1-a",
+    "id": "S1-a",
         "scenario": "technical issues",
         "q": '"game won\'t start" OR "game won\'t launch"'
+    },
+    {
+        "id": "S1-b",
+        "scenario": "technical issues",
+        "q": '"crashes on loading screens"'
     },
 
     # ========== SEARCH SCENARIO 2 ==========
@@ -44,6 +49,7 @@ if __name__ == "__main__":
     file = open("milestone2/output.txt", "w", encoding="utf-8")
     for query in QUERIES:
         resp = run(query)
+        file.write(f"\n== {query.get('id', 'N/A')} [{query.get('scenario', 'N/A')}] q={query.get('q', '*:*')!r} found={resp['numFound']}")
         print(f"\n== {query.get('id', 'N/A')} [{query.get('scenario', 'N/A')}] q={query.get('q', '*:*')!r} found={resp['numFound']}")
         for doc in resp["docs"]:
             full_text = str(doc.get("review", "")).replace("\n", " ")

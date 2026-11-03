@@ -4,7 +4,9 @@ import urllib.parse
 import urllib.request
 
 URL = f"http://localhost:8983/solr/games/select"
-QUERIES = [ {"id": "S1-a", "scenario": "technical issues", "q": '"game won\'t start" OR "game won\'t launch"' } ]
+QUERIES = [ {"id": "S1-a", "scenario": "technical issues", "q": '"game won\'t start"' }, 
+            {"id": "S1-b", "scenario": "technical issues", "q": '"crashes on loading screens"' },
+           ]
 
 def run(query):
     params = {
@@ -23,6 +25,7 @@ if __name__ == "__main__":
     file = open("milestone2/output.txt", "w")
     for query in QUERIES:
         resp = run(query)
+        file.write(f"\n== {query['id']} [{query['scenario']}] q={query['q']!r} found={resp['numFound']}\n")
         print(f"\n== {query['id']} [{query['scenario']}] q={query['q']!r} found={resp['numFound']}")
         for doc in resp["docs"]:
             full_text = str(doc.get("review", "")).replace("\n", " ")

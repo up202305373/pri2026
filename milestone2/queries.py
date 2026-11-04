@@ -1,12 +1,20 @@
-import json
+import os
 import sys
+import json
 import urllib.parse
 import urllib.request
 
-URL = f"http://localhost:8983/solr/games/select"
-QUERIES = [ {"id": "S1-a", "scenario": "technical issues", "q": '"game won\'t start"' }, 
-            {"id": "S1-b", "scenario": "technical issues", "q": '"crashes on loading screens"' },
-           ]
+URL = "http://localhost:8983/solr/games/select"
+SETUPS = ["basic", "improved"]
+SETUP = sys.argv[1] if len(sys.argv) > 1 else None
+if SETUP not in SETUPS:
+    sys.exit(f"usage: queries.py {{{', '.join(SETUPS)}}}")
+OUT_DIR = f"milestone2/results/{SETUP}"
+
+QUERIES = [
+    {"id": "S1-a", "scenario": "technical issues", "q": '"game won\'t start"'},
+    {"id": "S1-b", "scenario": "technical issues", "q": '"crashes on loading screens"'},
+]
 
 def run(query):
     params = {
@@ -22,14 +30,21 @@ def run(query):
         return json.load(r)["response"]
 
 if __name__ == "__main__":
-    file = open("milestone2/output.txt", "w")
+    os.makedirs(OUT_DIR, exist_ok=True)
+    dump = open(os.path.join(OUT_DIR, "dump.txt"), "w", encoding="utf-8")
+    qrels = open(os.path.join(OUT_DIR, "qrels.txt"), "w", encoding="utf-8")
+    results = open(os.path.join(OUT_DIR, "results.txt"), "w", encoding="utf-8")
+
     for query in QUERIES:
         resp = run(query)
-        file.write(f"\n== {query['id']} [{query['scenario']}] q={query['q']!r} found={resp['numFound']}\n")
+        dump.write(f"\n== {query['id']} [{query['scenario']}] q={query['q']!r} found={resp['numFound']}\n")
         print(f"\n== {query['id']} [{query['scenario']}] q={query['q']!r} found={resp['numFound']}")
-        for doc in resp["docs"]:
-            full_text = str(doc.get("review", "")).replace("\n", " ")
-            text = str(doc.get("review", ""))[:100].replace("\n", " ")
-            print(f" {doc['id']:<22} {doc.get('score', 0):.2f} {text}")
-            file.write(full_text + "\n")
-    file.close()
+        for rank, doc in enumerate(resp["docs"], start=1):
+            results.write(f"{query['id']} Q0 {doc['id']} {rank} {doc.get('score', 0):.6f} {SETUP}\n")
+            qrels.write(f"{query['id']} 0 {doc['id']} 0\n")
+            dump.write(str(doc.get("review", "")).replace("\n", " ") + "\n")
+            print(f"{doc['id']:<22}{doc.get('score',0):.2f}{str(doc.get("review","")).replace('\n',' ')[:100]}")
+
+    dump.close()
+    qrels.close()
+    results.close()

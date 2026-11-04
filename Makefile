@@ -1,6 +1,6 @@
 .PHONY: all process stats clean
 
-all: process stats
+all: process stats clean split solr-start solr-index solr-count
 
 process:
 	@echo "Running data processing pipeline..."

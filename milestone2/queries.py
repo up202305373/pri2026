@@ -12,20 +12,43 @@ if SETUP not in SETUPS:
 OUT_DIR = f"milestone2/results/{SETUP}"
 
 QUERIES = [
-    {"id": "S1-a", "scenario": "technical issues", "q": '"game won\'t start"'},
-    {"id": "S1-b", "scenario": "technical issues", "q": '"crashes on loading screens"'},
+    # ========== SEARCH SCENARIO 1 ==========
+    {
+    "id": "S1-a",
+        "scenario": "technical issues",
+        "q": '"game won\'t start"'
+    },
+    {
+        "id": "S1-b",
+        "scenario": "technical issues",
+        "q": '"crashes on loading"'
+    },
+
+    # ========== SEARCH SCENARIO 2 ==========
+
+    # ========== SEARCH SCENARIO 3 ==========
+
+    # ========== SEARCH SCENARIO 4 ==========
+    {
+        "id": "S4-a",
+        "scenario": "negative reviews on game favored by critics",
+        "fq": [
+            "recommend:\"Not Recommended\"",
+            "{!child of=\"doc_type:game\"}_query_:\"{!parent which='doc_type:game'}metascore:[80 TO 100]\""
+        ],
+    }
 ]
 
 def run(query):
     params = {
-        "q": query["q"],
-        "df": "review",
-        "fq": "doc_type:review",
-        "rows": 10,
-        "fl": "id,name,App_ID,source,recommend,review,score",
+        "q": query.get("q", "*:*"),
+        "df": query.get("df", "review"),
+        "fq": query.get("fq", "doc_type:review"),
+        "rows": query.get("rows", 10),
+        "fl": query.get("fl", "id,name,App_ID,source,recommend,review,score"),
         "wt": "json",
     }
-    url = f"{URL}?{urllib.parse.urlencode(params)}"
+    url = f"{URL}?{urllib.parse.urlencode(params, doseq=True)}"
     with urllib.request.urlopen(url) as r:
         return json.load(r)["response"]
 
@@ -37,8 +60,8 @@ if __name__ == "__main__":
 
     for query in QUERIES:
         resp = run(query)
-        dump.write(f"\n== {query['id']} [{query['scenario']}] q={query['q']!r} found={resp['numFound']}\n")
-        print(f"\n== {query['id']} [{query['scenario']}] q={query['q']!r} found={resp['numFound']}")
+        dump.write(f"\n== {query['id']} [{query['scenario']}] q={query.get("q", "")!r} fq={query.get("fq", "")!r} found={resp['numFound']}\n")
+        print(f"\n== {query['id']} [{query['scenario']}] q={query.get("q", "")!r} fq={query.get("fq", "")!r} found={resp['numFound']}")
         for rank, doc in enumerate(resp["docs"], start=1):
             results.write(f"{query['id']} Q0 {doc['id']} {rank} {doc.get('score', 0):.6f} {SETUP}\n")
             qrels.write(f"{query['id']} 0 {doc['id']} 0\n")

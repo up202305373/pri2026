@@ -107,10 +107,11 @@ if __name__ == "__main__":
         dump.write(f"\n== {query['id']} [{query['scenario']}] q={query.get("q", "")!r} fq={query.get("fq", "")!r} found={resp['numFound']}\n")
         print(f"\n== {query['id']} [{query['scenario']}] q={query.get("q", "")!r} fq={query.get("fq", "")!r} found={resp['numFound']}")
         for rank, doc in enumerate(resp["docs"], start=1):
+            label = doc.get("review") or doc.get("name", "")
             results.write(f"{query['id']} Q0 {doc['id']} {rank} {doc.get('score', 0):.6f} {SETUP}\n")
             qrels.write(f"{query['id']} 0 {doc['id']} 0\n")
-            dump.write(str(doc.get("review", "")).replace("\n", " ") + "\n")
-            print(f"{doc['id']:<22}{doc.get('score',0):.2f}{str(doc.get("review","")).replace('\n',' ')[:100]}")
+            dump.write(str(label).replace("\n", " ") + "\n")
+            print(f"{doc['id']:<16}{doc.get('score',0):.2f}    {str(label).replace("\n", " ")[:100]}")
 
     dump.close()
     qrels.close()

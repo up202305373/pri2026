@@ -28,8 +28,7 @@ TEXT_QUERIES = [
 ]
 
 GAME_QUERIES = [
-    {"id": "S4-a", "scenario": "critic and player disagreement", "critic_q": "loved it", "player_q": "hated it", "threshold": 0.5},
-    {"id": "S4-b", "scenario": "critic and player disagreement", "critic_q": "hated it", "player_q": "loved it", "threshold": 0.5},
+    {"id": "S4-a", "scenario": "critic and player disagreement", "critic_q": "loved amazing masterpiece", "player_q": "hated bad awful terrible boring", "threshold": 0.5},
 ]
 
 def run_review_query(query, setup):
@@ -81,7 +80,7 @@ def run_game_query(spec, setup):
         if share >= spec["threshold"]:
             rows.append((app_id, NAMES.get(app_id, ""), share, hits.get(app_id, 0), n))
     rows.sort(key=lambda r: (-r[2], r[0]))
-    return rows[:10]
+    return rows
 
 if __name__ == "__main__":
     os.makedirs(OUT_DIR, exist_ok=True)
@@ -106,7 +105,7 @@ if __name__ == "__main__":
         header = (f"\n== {spec['id']} [{spec['scenario']}] critic_q={spec['critic_q']!r} "f"player_q={spec['player_q']!r} threshold={spec['threshold']} found={len(rows)}")
         dump.write(header + "\n")
         print(header)
-        for rank, (app_id, name, share, hit_n, total_n) in enumerate(rows, start=1):
+        for rank, (app_id, name, share, hit_n, total_n) in enumerate(rows[:10], start=1):
             game_id = f"game_{app_id}"
             results.write(f"{spec['id']} Q0 {game_id} {rank} {share:.6f} {SETUP}\n")
             qrels.write(f"{spec['id']} 0 {game_id} 0\n")

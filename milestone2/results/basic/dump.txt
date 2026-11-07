@@ -107,26 +107,4 @@
 ["A slight downgrade from the original. There are very few levels, all of which are recycled over and over with a dash of randomization of what powerups you choose between and which of the levels are encountered. There are some new things added but after playing for the time I have, it definitely feels like I've seen it all already. Stick with the original unless they add worthwhile variety to the game."]
 ["I can present original King Arthur as a game with a 3 main components:  (main gameplay),  (characters, morality chart, etc.) and  (character's progression, party compositions, inventory, etc.)Let's compare:Couple more things:Conclusion - it's more elaborated version of skirmish pack dlc for original game, by nature. Significant downgrade from original game. It's cheaper, so - maybe it's a good deal for somebody who really like these battles. And if so - play at least on Hard, or even higher difficulty - game should shine on it. And if you liked narrative part of original and battles were tolerable - would not recommend this game."]
 
-== S4-a [critic and player disagreement] critic_q='loved it' player_q='hated it' threshold=0.5 found=10
-(App_ID 1179620) Journey of the Broken Circle: 12/12 Steam reviews match player_q (share 1.00)
-(App_ID 2059960) The Rumble Fish 2: 19/19 Steam reviews match player_q (share 1.00)
-(App_ID 1622710) Oceanhorn 2: Knights of the Lost Realm: 30/31 Steam reviews match player_q (share 0.97)
-(App_ID 1542110) Daydream: Forgotten Sorrow: 29/30 Steam reviews match player_q (share 0.97)
-(App_ID 1851030) God of Rock: 22/23 Steam reviews match player_q (share 0.96)
-(App_ID 2738750) REYNATIS: 20/21 Steam reviews match player_q (share 0.95)
-(App_ID 999220) Amnesia: Rebirth: 37/39 Steam reviews match player_q (share 0.95)
-(App_ID 1199370) Gleamlight: 36/38 Steam reviews match player_q (share 0.95)
-(App_ID 1097790) The Dark Crystal: Age of Resistance Tactics: 34/36 Steam reviews match player_q (share 0.94)
-(App_ID 1247570) Expedition Zero: 49/53 Steam reviews match player_q (share 0.92)
-
-== S4-b [critic and player disagreement] critic_q='hated it' player_q='loved it' threshold=0.5 found=10
-(App_ID 1179620) Journey of the Broken Circle: 12/12 Steam reviews match player_q (share 1.00)
-(App_ID 2059960) The Rumble Fish 2: 19/19 Steam reviews match player_q (share 1.00)
-(App_ID 1097790) The Dark Crystal: Age of Resistance Tactics: 35/36 Steam reviews match player_q (share 0.97)
-(App_ID 1622710) Oceanhorn 2: Knights of the Lost Realm: 30/31 Steam reviews match player_q (share 0.97)
-(App_ID 1542110) Daydream: Forgotten Sorrow: 29/30 Steam reviews match player_q (share 0.97)
-(App_ID 1851030) God of Rock: 22/23 Steam reviews match player_q (share 0.96)
-(App_ID 2738750) REYNATIS: 20/21 Steam reviews match player_q (share 0.95)
-(App_ID 999220) Amnesia: Rebirth: 37/39 Steam reviews match player_q (share 0.95)
-(App_ID 1199370) Gleamlight: 36/38 Steam reviews match player_q (share 0.95)
-(App_ID 1247570) Expedition Zero: 49/53 Steam reviews match player_q (share 0.92)
+== S4-a [critic and player disagreement] critic_q='loved amazing masterpiece' player_q='hated bad awful terrible boring' threshold=0.5 found=0

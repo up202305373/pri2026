@@ -1,7 +1,8 @@
-import json, subprocess
+import json, subprocess, sys
 
-URL = "http://localhost:8983/solr/games/schema"
-data = json.load(open("milestone2/schema_fix.json"))
+core, schema_path = sys.argv[1], sys.argv[2]
+URL = f"http://localhost:8983/solr/{core}/schema"
+data = json.load(open(schema_path))
 commands = data if isinstance(data, list) else [data]
 
 for entry in commands:

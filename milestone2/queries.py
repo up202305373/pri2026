@@ -4,8 +4,12 @@ import json
 import urllib.parse
 import urllib.request
 
+SETUPS = {
+    "basic": {"core": "games_basic", "params": {}},
+    "improved": {"core": "games_improved", "params": {"defType": "edismax", "qf": "review", "mm": "100%"}},
+}
+
 URL = "http://localhost:8983/solr/games/select"
-SETUPS = ["basic", "improved"]
 SETUP = sys.argv[1] if len(sys.argv) > 1 else None
 if SETUP not in SETUPS:
     sys.exit(f"usage: queries.py {{{', '.join(SETUPS)}}}")
@@ -33,58 +37,39 @@ QUERIES = [
     {
     "id": "S2-a",
         "scenario": "aspect-based opinions",
-        "q": '"great soundtrack"'
+        "q": "great soundtrack"
     },
     {
     "id": "S2-b",
         "scenario": "aspect-based opinions",
-        "q": '"amazing music"'
+        "q": "amazing music"
     },
     {
     "id": "S2-c",
         "scenario": "aspect-based opinions",
-        "q": '"best sound"'
+        "q": "best sound"
     },
 
     # ========== SEARCH SCENARIO 3 ==========
     {
         "id": "S3-a",
         "scenario": "game comparison",
-        "q": '"original better"'
+        "q": "original better"
     },
     {
         "id": "S3-b",
         "scenario": "game comparison",
-        "q": '"sequel worse"'
+        "q": "sequel worse"
     },
     {
         "id": "S3-c",
         "scenario": "game comparison",
-        "q": '"downgrade original"'
-    },
-
-    # ========== SEARCH SCENARIO 4 ==========
-    {
-        "id": "S4-a",
-        "scenario": "critic and player disagreement",
-        "q": '{!parent which="doc_type:game"}(source:Metacritic AND metascore:[75 TO 100])',
-        "fq": [
-            "doc_type:game",
-            "{!frange l=0.5}div(negative,sum(positive,negative))",
-        ],
-    },
-    {
-        "id": "S4-b",
-        "scenario": "critic and player disagreement",
-        "q": '{!parent which="doc_type:game"}(source:Metacritic AND metascore:[80 TO 100])',
-        "fq": [
-            "doc_type:game",
-            "{!frange l=0.5}div(negative,sum(positive,negative))",
-        ],
+        "q": "downgrade original"
     },
 ]
 
-def run(query):
+def run(query, setup):
+    cfg = SETUPS[setup]
     params = {
         "q": query.get("q", "*:*"),
         "df": query.get("df", "review"),
@@ -92,8 +77,9 @@ def run(query):
         "rows": query.get("rows", 10),
         "fl": query.get("fl", "id,name,App_ID,source,recommend,review,score"),
         "wt": "json",
+        **cfg["params"],
     }
-    url = f"{URL}?{urllib.parse.urlencode(params, doseq=True)}"
+    url = f"http://localhost:8983/solr/{cfg['core']}/select?{urllib.parse.urlencode(params, doseq=True)}"
     with urllib.request.urlopen(url) as r:
         return json.load(r)["response"]
 
@@ -104,9 +90,10 @@ if __name__ == "__main__":
     results = open(os.path.join(OUT_DIR, "results.txt"), "w", encoding="utf-8")
 
     for query in QUERIES:
-        resp = run(query)
-        dump.write(f"\n== {query['id']} [{query['scenario']}] q={query.get("q", "")!r} fq={query.get("fq", "")!r} found={resp['numFound']}\n")
-        print(f"\n== {query['id']} [{query['scenario']}] q={query.get("q", "")!r} fq={query.get("fq", "")!r} found={resp['numFound']}")
+        resp = run(query, SETUP)
+        header = f"\n== {query['id']} [{query['scenario']}] q={query.get('q', '')!r} found={resp['numFound']}"
+        dump.write(header + "\n")
+        print(header)
         for rank, doc in enumerate(resp["docs"], start=1):
             label = doc.get("review") or doc.get("name", "")
             results.write(f"{query['id']} Q0 {doc['id']} {rank} {doc.get('score', 0):.6f} {SETUP}\n")

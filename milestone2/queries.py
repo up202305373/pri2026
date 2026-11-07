@@ -14,19 +14,54 @@ OUT_DIR = f"milestone2/results/{SETUP}"
 QUERIES = [
     # ========== SEARCH SCENARIO 1 ==========
     {
-    "id": "S1-a",
+        "id": "S1-a",
         "scenario": "technical issues",
-        "q": '"game won\'t start"'
+        "q": "won't start"
     },
     {
         "id": "S1-b",
         "scenario": "technical issues",
-        "q": '"crashes on loading"'
+        "q": "crashes boot"
+    },
+    {
+        "id": "S1-c",
+        "scenario": "technical issues",
+        "q": "stuck loading"
     },
 
     # ========== SEARCH SCENARIO 2 ==========
+    {
+    "id": "S2-a",
+        "scenario": "aspect-based opinions",
+        "q": '"great soundtrack"'
+    },
+    {
+    "id": "S2-b",
+        "scenario": "aspect-based opinions",
+        "q": '"amazing music"'
+    },
+    {
+    "id": "S2-c",
+        "scenario": "aspect-based opinions",
+        "q": '"best sound"'
+    },
 
     # ========== SEARCH SCENARIO 3 ==========
+    {
+        "id": "S3-a",
+        "scenario": "game comparison",
+        "q": '"original better"'
+    },
+    {
+        "id": "S3-b",
+        "scenario": "game comparison",
+        "q": '"sequel worse"'
+    },
+    {
+        "id": "S3-c",
+        "scenario": "game comparison",
+        "q": '"downgrade original"'
+    },
 
     # ========== SEARCH SCENARIO 4 ==========
     {
@@ -36,7 +71,16 @@ QUERIES = [
             "recommend:\"Not Recommended\"",
             "{!child of=\"doc_type:game\"}_query_:\"{!parent which='doc_type:game'}metascore:[80 TO 100]\""
         ],
-    }
+    },
+    {
+        "id": "S4-b",
+        "scenario": "critic and player disagreement",
+        "q": '{!parent which="doc_type:game"}(source:Metacritic AND metascore:[75 TO 100])',
+        "fq": [
+            "doc_type:game",
+            "{!frange l=0.5}div(negative,sum(positive,negative))",
+        ],
+    },
 ]
 
 def run(query):

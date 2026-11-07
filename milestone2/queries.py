@@ -66,16 +66,17 @@ QUERIES = [
     # ========== SEARCH SCENARIO 4 ==========
     {
         "id": "S4-a",
-        "scenario": "negative reviews on game favored by critics",
+        "scenario": "critic and player disagreement",
+        "q": '{!parent which="doc_type:game"}(source:Metacritic AND metascore:[75 TO 100])',
         "fq": [
-            "recommend:\"Not Recommended\"",
-            "{!child of=\"doc_type:game\"}_query_:\"{!parent which='doc_type:game'}metascore:[80 TO 100]\""
+            "doc_type:game",
+            "{!frange l=0.5}div(negative,sum(positive,negative))",
         ],
     },
     {
         "id": "S4-b",
         "scenario": "critic and player disagreement",
-        "q": '{!parent which="doc_type:game"}(source:Metacritic AND metascore:[75 TO 100])',
+        "q": '{!parent which="doc_type:game"}(source:Metacritic AND metascore:[80 TO 100])',
         "fq": [
             "doc_type:game",
             "{!frange l=0.5}div(negative,sum(positive,negative))",

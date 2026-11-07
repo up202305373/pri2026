@@ -4,15 +4,20 @@ import json
 import urllib.parse
 import urllib.request
 
-SETUPS = {
+REVIEW_SETUPS = {
     "basic": {"core": "games_basic", "params": {}},
     "improved": {"core": "games_improved", "params": {"defType": "edismax", "qf": "review", "mm": "100%"}},
 }
 
+GAME_SETUPS = {
+    "basic": {"core": "games_basic", "params": {}},
+    "improved": {"core": "games_improved", "params": {"defType": "edismax", "qf": "review", "mm": "20%"}},
+}
+
 NAMES = {k: v.get("name", "") for k, v in json.load(open("data/processed/final_games.json", encoding="utf-8")).items()}
 SETUP = sys.argv[1] if len(sys.argv) > 1 else None
-if SETUP not in SETUPS:
-    sys.exit(f"usage: queries.py {{{', '.join(SETUPS)}}}")
+if SETUP not in REVIEW_SETUPS:
+    sys.exit(f"usage: queries.py {{{', '.join(REVIEW_SETUPS)}}}")
 OUT_DIR = f"milestone2/results/{SETUP}"
 
 TEXT_QUERIES = [
@@ -32,7 +37,7 @@ GAME_QUERIES = [
 ]
 
 def run_review_query(query, setup):
-    cfg = SETUPS[setup]
+    cfg = REVIEW_SETUPS[setup]
     params = {
         "q": query["q"],
         "df": "review",
@@ -48,7 +53,7 @@ def run_review_query(query, setup):
 
 def count_by_game(setup, q, fq):
     """Number of matching reviews per App_ID, from a facet on the same query."""
-    cfg = SETUPS[setup]
+    cfg = GAME_SETUPS[setup]
     params = {
         **cfg["params"],
         "q": q,

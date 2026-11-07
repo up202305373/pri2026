@@ -28,7 +28,7 @@
       "name": "recommend",
       "type": "string",
       "stored": true,
-      "indexed": true
+      "indexed": false
     }
   },
   {
@@ -140,7 +140,7 @@
       "name": "metascore",
       "type": "pdouble",
       "stored": true,
-      "indexed": true
+      "indexed": false
     }
   },
   {
@@ -173,7 +173,7 @@
       "name": "positive",
       "type": "plong",
       "stored": true,
-      "indexed": true
+      "indexed": false
     }
   },
   {
@@ -181,7 +181,7 @@
       "name": "negative",
       "type": "plong",
       "stored": true,
-      "indexed": true
+      "indexed": false
     }
   },
   {

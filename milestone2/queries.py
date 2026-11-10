@@ -5,11 +5,10 @@ import urllib.parse
 import urllib.request
 
 SETUPS = {
-    "basic": {"core": "games_basic", "params": {}},
-    "improved": {"core": "games_improved", "params": {"defType": "edismax", "qf": "review", "mm": "100%"}},
+    "basic": {"core": "games_basic", "params": {}, "slop": None},
+    "improved": {"core": "games_improved", "params": {}, "slop": 3},
 }
 
-URL = "http://localhost:8983/solr/games/select"
 SETUP = sys.argv[1] if len(sys.argv) > 1 else None
 if SETUP not in SETUPS:
     sys.exit(f"usage: queries.py {{{', '.join(SETUPS)}}}")
@@ -70,11 +69,14 @@ QUERIES = [
 
 def run(query, setup):
     cfg = SETUPS[setup]
+    q = query.get("q", "*:*")
+    if cfg["slop"] is not None:
+        q = f'"{q}"~{cfg["slop"]}'
     params = {
-        "q": query.get("q", "*:*"),
+        "q": q,
         "df": query.get("df", "review"),
         "fq": query.get("fq", "doc_type:review"),
-        "rows": query.get("rows", 10),
+        "rows": query.get("rows", 30),
         "fl": query.get("fl", "id,name,App_ID,source,recommend,review,score"),
         "wt": "json",
         **cfg["params"],

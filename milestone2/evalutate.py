@@ -106,4 +106,4 @@ if __name__ == "__main__":
     print(f"MAP: {i_map:.4f}")
     print(f"P@10: {i_p10:.4f}")
 
-    plot_pr_curve(b_recs, b_precs, i_precs, "milestone2/")
+    plot_pr_curve(b_recs, b_precs, i_precs, "milestone2/images")

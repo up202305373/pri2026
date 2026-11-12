@@ -92,8 +92,8 @@ def plot_pr_curve(recall_levels, basic_precs, improved_precs, output_dir):
     print(f"Saved PR curve to {output_dir}/pr_curve.png")
 
 if __name__ == "__main__":
-    basic_qrels, basic_res = load_trec_format("milestone2/results/basic/qrels.txt", "milestone2/results/basic/results.txt")
-    imp_qrels, imp_res = load_trec_format("milestone2/results/improved/qrels.txt", "milestone2/results/improved/results.txt")
+    basic_qrels, basic_res = load_trec_format("milestone2/results/basic/judgements.txt", "milestone2/results/basic/results.txt")
+    imp_qrels, imp_res = load_trec_format("milestone2/results/improved/judgements.txt", "milestone2/results/improved/results.txt")
 
     b_map, b_p10, b_recs, b_precs = calculate_metrics(basic_qrels, basic_res, k=10)
     i_map, i_p10, i_recs, i_precs = calculate_metrics(imp_qrels, imp_res, k=10)

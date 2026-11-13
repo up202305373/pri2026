@@ -59,6 +59,8 @@ def calculate_metrics(qrels, results, k=10):
             if i + 1 == k:
                 precisions_at_k.append(hits / k)
 
+        if len(docs) < k and len(docs) > 0:
+            precisions_at_k.append(hits / len(docs))
         average_precisions.append(ap_sum / total_rel)
 
         # Calculate 11-point interpolated precision for this query
@@ -129,9 +131,9 @@ if __name__ == "__main__":
             with open("tmp_results.txt", "w") as f:
                 f.writelines(lines_for(os.path.join(d, "results.txt"), qid))
             qrels, res = load_trec_format("tmp_qrels.txt", "tmp_results.txt")
-            m, p10, recs, precs = calculate_metrics(qrels, res, k=10)
+            m, p30, recs, precs = calculate_metrics(qrels, res, k=30)
             curves[setup][qid] = (recs, precs)
-            print(f"{setup:<9} {qid:<6} AP={m:.4f}  P@10={p10:.4f}")
+            print(f"{setup:<9} {qid:<6} AP={m:.4f}  P@30={p30:.4f}")
     os.remove("tmp_qrels.txt")
     os.remove("tmp_results.txt")
 
@@ -147,15 +149,15 @@ if __name__ == "__main__":
         os.path.join(BASE, "results", "improved", "judgements.txt"),
         os.path.join(BASE, "results", "improved", "results.txt"))
 
-    b_map, b_p10, b_recs, b_precs = calculate_metrics(basic_qrels, basic_res, k=10)
-    i_map, i_p10, i_recs, i_precs = calculate_metrics(imp_qrels, imp_res, k=10)
+    b_map, b_p30, b_recs, b_precs = calculate_metrics(basic_qrels, basic_res, k=30)
+    i_map, i_p30, i_recs, i_precs = calculate_metrics(imp_qrels, imp_res, k=30)
 
     print(f"=== Basic Setup ===")
     print(f"MAP: {b_map:.4f}")
-    print(f"P@10: {b_p10:.4f}")
+    print(f"P@30: {b_p30:.4f}")
     
     print(f"\n=== Improved Setup ===")
     print(f"MAP: {i_map:.4f}")
-    print(f"P@10: {i_p10:.4f}")
+    print(f"P@30: {i_p30:.4f}")
 
     plot_pr_curve(b_recs, b_precs, i_precs, IMAGES)

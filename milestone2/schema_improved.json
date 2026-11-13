@@ -227,9 +227,9 @@
   {
     "add-field": {
       "name": "name",
-      "type": "text_en",
+      "type": "text_general",
       "stored": true,
-      "indexed": true
+      "indexed": false
     }
   },
   {

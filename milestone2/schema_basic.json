@@ -229,7 +229,7 @@
       "name": "name",
       "type": "text_general",
       "stored": true,
-      "indexed": true
+      "indexed": false
     }
   },
   {

@@ -3,6 +3,10 @@ import sys
 from collections import defaultdict
 import matplotlib.pyplot as plt
 
+QUERY_IDS = ["S1-a", "S1-b", "S1-c", 
+             "S2-a", "S2-b", "S2-c", 
+             "S3-a", "S3-b", "S3-c"]
+
 def load_trec_format(qrels_path, results_path):
     qrels = defaultdict(dict)
     with open(qrels_path, 'r') as f:
@@ -91,9 +95,57 @@ def plot_pr_curve(recall_levels, basic_precs, improved_precs, output_dir):
     plt.savefig(os.path.join(output_dir, 'pr_curve.png'))
     print(f"Saved PR curve to {output_dir}/pr_curve.png")
 
+def plot_query_pr(qid, b_recs, b_precs, i_precs, output_dir):
+    plt.figure(figsize=(8, 6))
+    plt.plot(b_recs, b_precs, label='Basic Setup', marker='o')
+    plt.plot(b_recs, i_precs, label='Improved Setup', marker='s')
+    plt.title(f'11-Point Interpolated PR Curve: {qid}')
+    plt.xlabel('Recall')
+    plt.ylabel('Interpolated Precision')
+    plt.legend()
+    plt.grid(True)
+    plt.ylim([0.0, 1.05])
+    plt.xlim([0.0, 1.0])
+    plt.savefig(os.path.join(output_dir, f'pr_curve_{qid}.png'))
+    plt.close()
+
+def lines_for(path, qid):
+    with open(path) as f:
+        return [line for line in f if line.split()[0] == qid]
+
 if __name__ == "__main__":
-    basic_qrels, basic_res = load_trec_format("milestone2/results/basic/judgements.txt", "milestone2/results/basic/results.txt")
-    imp_qrels, imp_res = load_trec_format("milestone2/results/improved/judgements.txt", "milestone2/results/improved/results.txt")
+    BASE = os.path.dirname(os.path.abspath(__file__))
+    IMAGES = os.path.join(BASE, "images")
+    PER_QUERY = os.path.join(IMAGES, "per_query")
+    os.makedirs(PER_QUERY, exist_ok=True)
+
+    curves = {}
+    for setup in ["basic", "improved"]:
+        d = os.path.join(BASE, "results", setup)
+        curves[setup] = {}
+        for qid in QUERY_IDS:
+            with open("tmp_qrels.txt", "w") as f:
+                f.writelines(lines_for(os.path.join(d, "judgements.txt"), qid))
+            with open("tmp_results.txt", "w") as f:
+                f.writelines(lines_for(os.path.join(d, "results.txt"), qid))
+            qrels, res = load_trec_format("tmp_qrels.txt", "tmp_results.txt")
+            m, p10, recs, precs = calculate_metrics(qrels, res, k=10)
+            curves[setup][qid] = (recs, precs)
+            print(f"{setup:<9} {qid:<6} AP={m:.4f}  P@10={p10:.4f}")
+    os.remove("tmp_qrels.txt")
+    os.remove("tmp_results.txt")
+
+    for qid in QUERY_IDS:
+        b_recs, b_precs = curves["basic"][qid]
+        _, i_precs = curves["improved"][qid]
+        plot_query_pr(qid, b_recs, b_precs, i_precs, PER_QUERY)
+
+    basic_qrels, basic_res = load_trec_format(
+        os.path.join(BASE, "results", "basic", "judgements.txt"),
+        os.path.join(BASE, "results", "basic", "results.txt"))
+    imp_qrels, imp_res = load_trec_format(
+        os.path.join(BASE, "results", "improved", "judgements.txt"),
+        os.path.join(BASE, "results", "improved", "results.txt"))
 
     b_map, b_p10, b_recs, b_precs = calculate_metrics(basic_qrels, basic_res, k=10)
     i_map, i_p10, i_recs, i_precs = calculate_metrics(imp_qrels, imp_res, k=10)
@@ -106,4 +158,4 @@ if __name__ == "__main__":
     print(f"MAP: {i_map:.4f}")
     print(f"P@10: {i_p10:.4f}")
 
-    plot_pr_curve(b_recs, b_precs, i_precs, "milestone2/images")
+    plot_pr_curve(b_recs, b_precs, i_precs, IMAGES)

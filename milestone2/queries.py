@@ -100,7 +100,7 @@ if __name__ == "__main__":
             label = doc.get("review") or doc.get("name", "")
             results.write(f"{query['id']} Q0 {doc['id']} {rank} {doc.get('score', 0):.6f} {SETUP}\n")
             qrels.write(f"{query['id']} 0 {doc['id']} 0\n")
-            dump.write(f"{doc['id']}\t{str(label).replace(chr(10), ' ')}\n")
+            dump.write(f"{rank}\t{doc['score']:.6f}\t{doc['id']}\t{doc.get('source', '')}\t{doc.get('name', '')}\t{str(label).replace(chr(10), ' ')}\n")
             print(f"{doc['id']:<16}{doc.get('score',0):.2f}    {str(label).replace("\n", " ")[:100]}")
 
     dump.close()

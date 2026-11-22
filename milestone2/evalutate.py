@@ -2,6 +2,8 @@ import os
 import sys
 from collections import defaultdict
 import matplotlib.pyplot as plt
+from scipy import stats
+import numpy as np
 
 QUERY_IDS = ["S1-a", "S1-b", "S1-c", 
              "S2-a", "S2-b", "S2-c", 
@@ -121,6 +123,11 @@ if __name__ == "__main__":
     PER_QUERY = os.path.join(IMAGES, "per_query")
     os.makedirs(PER_QUERY, exist_ok=True)
 
+    basic_aps = []
+    improved_aps = []
+    basic_p30s = []
+    improved_p30s = []
+
     curves = {}
     for setup in ["basic", "improved"]:
         d = os.path.join(BASE, "results", setup)
@@ -133,6 +140,12 @@ if __name__ == "__main__":
             qrels, res = load_trec_format("tmp_qrels.txt", "tmp_results.txt")
             m, p30, recs, precs = calculate_metrics(qrels, res, k=30)
             curves[setup][qid] = (recs, precs)
+            if setup == "basic":
+                basic_aps.append(m)
+                basic_p30s.append(p30)
+            elif setup == "improved":
+                improved_aps.append(m)
+                improved_p30s.append(p30)
             print(f"{setup:<9} {qid:<6} AP={m:.4f}  P@30={p30:.4f}")
     os.remove("tmp_qrels.txt")
     os.remove("tmp_results.txt")
@@ -161,3 +174,31 @@ if __name__ == "__main__":
     print(f"P@30: {i_p30:.4f}")
 
     plot_pr_curve(b_recs, b_precs, i_precs, IMAGES)
+
+    # statistical significance tests
+    def statistic(x, y):
+        return np.mean(x) - np.mean(y)
+    
+    # Test for MAP (Average Precision)
+    res_map = stats.permutation_test(
+        (improved_aps, basic_aps), 
+        statistic, 
+        permutation_type='samples', 
+        alternative='two-sided',
+        n_resamples=9999
+    )
+
+    # Test for P@30
+    res_p30 = stats.permutation_test(
+        (improved_p30s, basic_p30s), 
+        statistic, 
+        permutation_type='samples', 
+        alternative='two-sided',
+        n_resamples=9999
+    )
+
+    print(f"MAP Permutation test p-value: {res_map.pvalue:.4f}")
+    print(f"P@30 Permutation test p-value: {res_p30.pvalue:.4f}")
+
+    print(f"Basic 11-point precisions: {[round(p, 4) for p in b_precs]}")
+    print(f"Improved 11-point precisions: {[round(p, 4) for p in i_precs]}")

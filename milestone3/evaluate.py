@@ -1,0 +1,204 @@
+import os
+import sys
+from collections import defaultdict
+import matplotlib.pyplot as plt
+from scipy import stats
+import numpy as np
+
+QUERY_IDS = ["S1-a", "S1-b", "S1-c", 
+             "S2-a", "S2-b", "S2-c", 
+             "S3-a", "S3-b", "S3-c"]
+
+def load_trec_format(qrels_path, results_path):
+    qrels = defaultdict(dict)
+    with open(qrels_path, 'r') as f:
+        for line in f:
+            qid, _, docid, rel = line.strip().split()
+            qrels[qid][docid] = int(rel)
+            
+    results = defaultdict(list)
+    with open(results_path, 'r') as f:
+        for line in f:
+            qid, _, docid, rank, score, _ = line.strip().split()
+            results[qid].append((docid, float(score)))
+            
+    # Sort results by score descending
+    for qid in results:
+        results[qid].sort(key=lambda x: x[1], reverse=True)
+        
+    return qrels, results
+
+def calculate_metrics(qrels, results, k=10):
+    average_precisions = []
+    precisions_at_k = []
+    
+    # For 11-point Precision-Recall curve
+    recall_levels = [x / 10.0 for x in range(11)]
+    interpolated_precisions = {lvl: [] for lvl in recall_levels}
+
+    for qid, docs in results.items():
+        if qid not in qrels:
+            continue
+            
+        relevant_docs = {docid for docid, rel in qrels[qid].items() if rel > 0}
+        total_rel = len(relevant_docs)
+        if total_rel == 0:
+            continue
+
+        hits = 0
+        ap_sum = 0.0
+        precisions = []
+        recalls = []
+
+        for i, (docid, _) in enumerate(docs):
+            if docid in relevant_docs:
+                hits += 1
+                ap_sum += hits / (i + 1)
+            
+            precisions.append(hits / (i + 1))
+            recalls.append(hits / total_rel)
+            
+            if i + 1 == k:
+                precisions_at_k.append(hits / k)
+
+        if len(docs) < k and len(docs) > 0:
+            precisions_at_k.append(hits / len(docs))
+        average_precisions.append(ap_sum / total_rel)
+
+        # Calculate 11-point interpolated precision for this query
+        for lvl in recall_levels:
+            # Find max precision for any recall >= lvl
+            valid_precs = [p for p, r in zip(precisions, recalls) if r >= lvl]
+            max_p = max(valid_precs) if valid_precs else 0.0
+            interpolated_precisions[lvl].append(max_p)
+
+    map_score = sum(average_precisions) / len(average_precisions) if average_precisions else 0
+    p_at_k_score = sum(precisions_at_k) / len(precisions_at_k) if precisions_at_k else 0
+    
+    avg_interpolated_precisions = [
+        sum(interpolated_precisions[lvl]) / len(interpolated_precisions[lvl]) 
+        if len(interpolated_precisions[lvl]) > 0 else 0.0
+        for lvl in recall_levels
+    ]
+
+    return map_score, p_at_k_score, recall_levels, avg_interpolated_precisions
+
+def plot_pr_curve(recall_levels, basic_precs, improved_precs, output_dir):
+    plt.figure(figsize=(8, 6))
+    plt.plot(recall_levels, basic_precs, label='Basic Setup', marker='o')
+    plt.plot(recall_levels, improved_precs, label='Improved Setup', marker='s')
+    
+    plt.title('11-Point Interpolated Precision-Recall Curve')
+    plt.xlabel('Recall')
+    plt.ylabel('Interpolated Precision')
+    plt.legend()
+    plt.grid(True)
+    plt.ylim([0.0, 1.05])
+    plt.xlim([0.0, 1.0])
+    
+    plt.savefig(os.path.join(output_dir, 'pr_curve.png'))
+    print(f"Saved PR curve to {output_dir}/pr_curve.png")
+
+def plot_query_pr(qid, b_recs, b_precs, i_precs, output_dir):
+    plt.figure(figsize=(8, 6))
+    plt.plot(b_recs, b_precs, label='Basic Setup', marker='o')
+    plt.plot(b_recs, i_precs, label='Improved Setup', marker='s')
+    plt.title(f'11-Point Interpolated PR Curve: {qid}')
+    plt.xlabel('Recall')
+    plt.ylabel('Interpolated Precision')
+    plt.legend()
+    plt.grid(True)
+    plt.ylim([0.0, 1.05])
+    plt.xlim([0.0, 1.0])
+    plt.savefig(os.path.join(output_dir, f'pr_curve_{qid}.png'))
+    plt.close()
+
+def lines_for(path, qid):
+    with open(path) as f:
+        return [line for line in f if line.split()[0] == qid]
+
+if __name__ == "__main__":
+    BASE = os.path.dirname(os.path.abspath(__file__))
+    IMAGES = os.path.join(BASE, "images")
+    PER_QUERY = os.path.join(IMAGES, "per_query")
+    os.makedirs(PER_QUERY, exist_ok=True)
+
+    basic_aps = []
+    improved_aps = []
+    basic_p30s = []
+    improved_p30s = []
+
+    curves = {}
+    for setup in ["basic", "improved"]:
+        d = os.path.join(BASE, "results", setup)
+        curves[setup] = {}
+        for qid in QUERY_IDS:
+            with open("tmp_qrels.txt", "w") as f:
+                f.writelines(lines_for(os.path.join(d, "judgements.txt"), qid))
+            with open("tmp_results.txt", "w") as f:
+                f.writelines(lines_for(os.path.join(d, "results.txt"), qid))
+            qrels, res = load_trec_format("tmp_qrels.txt", "tmp_results.txt")
+            m, p30, recs, precs = calculate_metrics(qrels, res, k=30)
+            curves[setup][qid] = (recs, precs)
+            if setup == "basic":
+                basic_aps.append(m)
+                basic_p30s.append(p30)
+            elif setup == "improved":
+                improved_aps.append(m)
+                improved_p30s.append(p30)
+            print(f"{setup:<9} {qid:<6} AP={m:.4f}  P@30={p30:.4f}")
+    os.remove("tmp_qrels.txt")
+    os.remove("tmp_results.txt")
+
+    for qid in QUERY_IDS:
+        b_recs, b_precs = curves["basic"][qid]
+        _, i_precs = curves["improved"][qid]
+        plot_query_pr(qid, b_recs, b_precs, i_precs, PER_QUERY)
+
+    basic_qrels, basic_res = load_trec_format(
+        os.path.join(BASE, "results", "basic", "judgements.txt"),
+        os.path.join(BASE, "results", "basic", "results.txt"))
+    imp_qrels, imp_res = load_trec_format(
+        os.path.join(BASE, "results", "improved", "judgements.txt"),
+        os.path.join(BASE, "results", "improved", "results.txt"))
+
+    b_map, b_p30, b_recs, b_precs = calculate_metrics(basic_qrels, basic_res, k=30)
+    i_map, i_p30, i_recs, i_precs = calculate_metrics(imp_qrels, imp_res, k=30)
+
+    print(f"=== Basic Setup ===")
+    print(f"MAP: {b_map:.4f}")
+    print(f"P@30: {b_p30:.4f}")
+    
+    print(f"\n=== Improved Setup ===")
+    print(f"MAP: {i_map:.4f}")
+    print(f"P@30: {i_p30:.4f}")
+
+    plot_pr_curve(b_recs, b_precs, i_precs, IMAGES)
+
+    # statistical significance tests
+    def statistic(x, y):
+        return np.mean(x) - np.mean(y)
+    
+    # Test for MAP (Average Precision)
+    res_map = stats.permutation_test(
+        (improved_aps, basic_aps), 
+        statistic, 
+        permutation_type='samples', 
+        alternative='two-sided',
+        n_resamples=9999
+    )
+
+    # Test for P@30
+    res_p30 = stats.permutation_test(
+        (improved_p30s, basic_p30s), 
+        statistic, 
+        permutation_type='samples', 
+        alternative='two-sided',
+        n_resamples=9999
+    )
+
+    print(f"MAP Permutation test p-value: {res_map.pvalue:.4f}")
+    print(f"P@30 Permutation test p-value: {res_p30.pvalue:.4f}")
+
+    print(f"Basic 11-point precisions: {[round(p, 4) for p in b_precs]}")
+    print(f"Improved 11-point precisions: {[round(p, 4) for p in i_precs]}")

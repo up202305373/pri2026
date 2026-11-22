@@ -2,3 +2,6 @@
 data/raw/
 data/processed/Final_Search_Corpus.csv.gz
 __pycache__
+
+milestone3/results/
+milestone3/images/

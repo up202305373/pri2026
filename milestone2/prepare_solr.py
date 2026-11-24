@@ -4,7 +4,7 @@ import json
 
 import pandas as pd
 
-OUT = "data/solr"
+OUT = "data/solr_lexical"
 BATCH_SIZE = 50
 CHILD_KEY = "_childDocuments_"
 

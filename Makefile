@@ -28,21 +28,22 @@ solr-index-basic:
 	sudo docker exec pri_solr solr create -c games_basic
 	python3 milestone2/apply_schema.py games_basic milestone2/schema_basic.json
 	python3 milestone2/prepare_solr.py
-	for f in data/solr/games_batch_*.json; do curl --fail-with-body -s -X POST -H 'Content-Type: application/json' --data-binary @"$$f" http://localhost:8983/solr/games_basic/update || exit 1; done
+	for f in data/solr_lexical/games_batch_*.json; do curl --fail-with-body -s -X POST -H 'Content-Type: application/json' --data-binary @"$$f" http://localhost:8983/solr/games_basic/update || exit 1; done
 	curl -s "http://localhost:8983/solr/games_basic/update?commit=true"
 
 solr-index-improved:
 	-sudo docker exec pri_solr solr delete -c games_improved
 	sudo docker exec pri_solr solr create -c games_improved
 	python3 milestone2/apply_schema.py games_improved milestone2/schema_improved.json
-	for f in data/solr/games_batch_*.json; do curl --fail-with-body -s -X POST -H 'Content-Type: application/json' --data-binary @"$$f" http://localhost:8983/solr/games_improved/update || exit 1; done
+	for f in data/solr_lexical/games_batch_*.json; do curl --fail-with-body -s -X POST -H 'Content-Type: application/json' --data-binary @"$$f" http://localhost:8983/solr/games_improved/update || exit 1; done
 	curl -s "http://localhost:8983/solr/games_improved/update?commit=true"
 
 solr-index-semantics:
 	-sudo docker exec pri_solr solr delete -c games_semantics
 	sudo docker exec pri_solr solr create -c games_semantics
-	python3 milestone2/apply_schema.py games_semantics milestone3/schema_semantics.json
-	for f in data/solr/games_batch_*.json; do curl --fail-with-body -s -X POST -H 'Content-Type: application/json' --data-binary @"$$f" http://localhost:8983/solr/games_semantics/update || exit 1; done
+	python3 milestone3/apply_schema.py games_semantics milestone3/schema_semantics.json
+	#python3 milestone3/prepare_solr.py 
+	for f in data/solr_semantics/games_batch_*.json; do curl --fail-with-body -s -X POST -H 'Content-Type: application/json' --data-binary @"$$f" http://localhost:8983/solr/games_semantics/update || exit 1; done
 	curl -s "http://localhost:8983/solr/games_semantics/update?commit=true"
 
 solr-count:

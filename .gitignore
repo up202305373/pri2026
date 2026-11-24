@@ -1,6 +1,7 @@
 .venv/
 data/raw/
 data/processed/Final_Search_Corpus.csv.gz
+data/solr_semantics/
 __pycache__
 
 milestone3/results/

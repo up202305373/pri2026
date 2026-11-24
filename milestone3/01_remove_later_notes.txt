@@ -1,8 +1,11 @@
-For S3 specifically (though remember the approach has to be general), get game name, derive the predecessor's names, allow those names to replace "original" (semantics)
-make 1 and 2 count differently for the statistics
-UI is a nice thing but won't be worth much
+Approaches must be general: same code for all queries, trigger on query type not qid, no per-query hacks. Fix parameters before evaluating.
 
-Additional approaches to improve retrieval (to be explored and evaluated by one group member):
--
--
--
+Additional approaches to improve retrieval (one per group member):
+- Relational/predecessor expansion: fixed comparison-term trigger, derive predecessor names from corpus titles (motivation: S3 polarity confusion)
+- Negation-aware ranking: fixed negation rule applied to every review for every query (motivation: "works fine" / "without crashes" in S1 results)
+- Pseudo-relevance feedback: expand any query from its own top-k results (motivation: short queries + 32-token review cap)
+
+Evaluate: top 10 per query, grades 0/1/2 with 2 weighted higher, nDCG@10 + P@10, compare against M3 semantics and M2 baselines.
+
+Use graded relevance: grade 2 should count more than grade 1 in the metrics.
+Create the UI - nice to have, even though it won't be the bulk of the grade.

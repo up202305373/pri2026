@@ -21,6 +21,7 @@ split:
 solr-start:
 	sudo docker start pri_solr 2>/dev/null || docker run --name pri_solr -p 8983:8983 -d solr:10 solr-precreate games_basic
 	sudo docker start pri_solr 2>/dev/null || docker run --name pri_solr -p 8983:8983 -d solr:10 solr-precreate games_improved
+	sudo docker start pri_solr 2>/dev/null || docker run --name pri_solr -p 8983:8983 -d solr:10 solr-precreate games_semantics
 
 solr-index-basic:
 	-sudo docker exec pri_solr solr delete -c games_basic
@@ -37,11 +38,20 @@ solr-index-improved:
 	for f in data/solr/games_batch_*.json; do curl --fail-with-body -s -X POST -H 'Content-Type: application/json' --data-binary @"$$f" http://localhost:8983/solr/games_improved/update || exit 1; done
 	curl -s "http://localhost:8983/solr/games_improved/update?commit=true"
 
+solr-index-semantics:
+	-sudo docker exec pri_solr solr delete -c games_semantics
+	sudo docker exec pri_solr solr create -c games_semantics
+	python3 milestone2/apply_schema.py games_semantics milestone3/schema_semantics.json
+	for f in data/solr/games_batch_*.json; do curl --fail-with-body -s -X POST -H 'Content-Type: application/json' --data-binary @"$$f" http://localhost:8983/solr/games_semantics/update || exit 1; done
+	curl -s "http://localhost:8983/solr/games_semantics/update?commit=true"
+
 solr-count:
 	@curl -s "http://localhost:8983/solr/games_basic/select?q=*:*&rows=0&fq=doc_type:game" | python3 -c "import json,sys; print('games:', json.load(sys.stdin)['response']['numFound'])"
 	@curl -s "http://localhost:8983/solr/games_basic/select?q=*:*&rows=0&fq=doc_type:review" | python3 -c "import json,sys; print('reviews:', json.load(sys.stdin)['response']['numFound'])"
 	@curl -s "http://localhost:8983/solr/games_improved/select?q=*:*&rows=0&fq=doc_type:game" | python3 -c "import json,sys; print('games:', json.load(sys.stdin)['response']['numFound'])"
 	@curl -s "http://localhost:8983/solr/games_improved/select?q=*:*&rows=0&fq=doc_type:review" | python3 -c "import json,sys; print('reviews:', json.load(sys.stdin)['response']['numFound'])"
+	@curl -s "http://localhost:8983/solr/games_semantics/select?q=*:*&rows=0&fq=doc_type:game" | python3 -c "import json,sys; print('games:', json.load(sys.stdin)['response']['numFound'])"
+	@curl -s "http://localhost:8983/solr/games_semantics/select?q=*:*&rows=0&fq=doc_type:review" | python3 -c "import json,sys; print('reviews:', json.load(sys.stdin)['response']['numFound'])"
 
 solr-stop:
 	docker stop pri_solr

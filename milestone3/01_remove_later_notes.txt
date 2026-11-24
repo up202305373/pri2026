@@ -1,3 +1,8 @@
 For S3 specifically (though remember the approach has to be general), get game name, derive the predecessor's names, allow those names to replace "original" (semantics)
 make 1 and 2 count differently for the statistics
 UI is a nice thing but won't be worth much
+
+Additional approaches to improve retrieval (to be explored and evaluated by one group member):
+-
+-
+-

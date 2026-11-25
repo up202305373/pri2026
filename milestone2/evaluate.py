@@ -5,15 +5,37 @@ import matplotlib.pyplot as plt
 from scipy import stats
 import numpy as np
 
+BASE = os.path.dirname(os.path.abspath(__file__))
+JUDGEMENTS = os.path.join(BASE, "results", "judgements.txt")
+
 QUERY_IDS = ["S1-a", "S1-b", "S1-c", 
              "S2-a", "S2-b", "S2-c", 
              "S3-a", "S3-b", "S3-c"]
+
+def sync_qrels(qrels_path):
+    """Fill qrels.txt from the shared judgements file; leave unjudged docs as N."""
+    grades = {}
+    if os.path.exists(JUDGEMENTS):
+        with open(JUDGEMENTS) as f:
+            for line in f:
+                qid, _, docid, rel = line.split()
+                grades[(qid, docid)] = rel
+
+    with open(qrels_path) as f:
+        entries = [line.split() for line in f if line.strip()]
+
+    with open(qrels_path, "w") as f:
+        for qid, _, docid, _ in entries:
+            f.write(f"{qid} 0 {docid} {grades.get((qid, docid), 'N')}\n")
+
 
 def load_trec_format(qrels_path, results_path):
     qrels = defaultdict(dict)
     with open(qrels_path, 'r') as f:
         for line in f:
             qid, _, docid, rel = line.strip().split()
+            if rel == 'N':
+                continue
             qrels[qid][docid] = int(rel)
             
     results = defaultdict(list)
@@ -118,7 +140,6 @@ def lines_for(path, qid):
         return [line for line in f if line.split()[0] == qid]
 
 if __name__ == "__main__":
-    BASE = os.path.dirname(os.path.abspath(__file__))
     IMAGES = os.path.join(BASE, "images")
     PER_QUERY = os.path.join(IMAGES, "per_query")
     os.makedirs(PER_QUERY, exist_ok=True)
@@ -131,10 +152,12 @@ if __name__ == "__main__":
     curves = {}
     for setup in ["basic", "improved"]:
         d = os.path.join(BASE, "results", setup)
+        qrels_path = os.path.join(d, "qrels.txt")
+        sync_qrels(qrels_path)
         curves[setup] = {}
         for qid in QUERY_IDS:
             with open("tmp_qrels.txt", "w") as f:
-                f.writelines(lines_for(os.path.join(d, "judgements.txt"), qid))
+                f.writelines(lines_for(qrels_path, qid))
             with open("tmp_results.txt", "w") as f:
                 f.writelines(lines_for(os.path.join(d, "results.txt"), qid))
             qrels, res = load_trec_format("tmp_qrels.txt", "tmp_results.txt")
@@ -156,10 +179,10 @@ if __name__ == "__main__":
         plot_query_pr(qid, b_recs, b_precs, i_precs, PER_QUERY)
 
     basic_qrels, basic_res = load_trec_format(
-        os.path.join(BASE, "results", "basic", "judgements.txt"),
+        os.path.join(BASE, "results", "basic", "qrels.txt"),
         os.path.join(BASE, "results", "basic", "results.txt"))
     imp_qrels, imp_res = load_trec_format(
-        os.path.join(BASE, "results", "improved", "judgements.txt"),
+        os.path.join(BASE, "results", "improved", "qrels.txt"),
         os.path.join(BASE, "results", "improved", "results.txt"))
 
     b_map, b_p30, b_recs, b_precs = calculate_metrics(basic_qrels, basic_res, k=30)
